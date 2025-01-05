@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path, Query
 from enum import Enum
 from pydantic import BaseModel
 
@@ -75,10 +75,10 @@ def remove_item(item_id: int) -> dict[str, Item]:
 
 @app.put("/items/{item_id}")
 def update(
-    item_id: int,
-    name: str | None = None,
-    price: float | None = None,
-    count: int | None = None
+    item_id: int=Path(ge=0), # >= 0
+    name: str | None = Query(default = None, min_length=1, max_length=8),
+    price: float | None = Query(default = None, gt=0.0),
+    count: int | None = Query(default = None, gt=0)
 ) -> dict[str, Item]:
     
     if item_id not in items:
