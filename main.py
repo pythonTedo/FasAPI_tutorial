@@ -1,20 +1,27 @@
 from fastapi import FastAPI, HTTPException, Path, Query
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-app = FastAPI()
+app = FastAPI(
+    title="Demo FastAPI",
+    desctiption="Teos first FastAPI project", 
+    version="0.0.1"
+)
 
 class Category(Enum):
+    """Category of an Item"""
+
     TOOLS="tools"
     CONSUMABLES = "consumables"
 
 
 class Item(BaseModel):
-    name: str
-    price: float
-    count: int
-    id: int
-    category: Category
+    """Basic Item in the system"""
+    name: str = Field(description="Name of the item")
+    price: float = Field(description="Price of the item")
+    count: int = Field(description="Quantity of the item")
+    id: int = Field(description="ID of the item")
+    category: Category = Field(description="Category of the item")
 
 #to Specify non path but query parameters like /items?count=20
 Selection = dict[str, str | int | float | Category | None]
@@ -73,10 +80,14 @@ def remove_item(item_id: int) -> dict[str, Item]:
 
     return {"deleted": item}
 
-@app.put("/items/{item_id}")
+@app.put("/items/{item_id}",
+         responses={
+             404: {"description": "Item Not found"},
+             400: {"description": "No arguments specified"}
+         })
 def update(
-    item_id: int=Path(ge=0), # >= 0
-    name: str | None = Query(default = None, min_length=1, max_length=8),
+    item_id: int=Path(title="Item ID", description="Unique integer that specifies the item", ge=0), # >= 0
+    name: str | None = Query(title="Name", description="New name of the item.", default = None, min_length=1, max_length=8),
     price: float | None = Query(default = None, gt=0.0),
     count: int | None = Query(default = None, gt=0)
 ) -> dict[str, Item]:
