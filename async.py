@@ -46,10 +46,18 @@ async def index2(call_id: int):
 
 
 """
-The function is being called concurrently by 3 different processes.
-It works the same way as the previous function but it is not an async function. 
+The function is being called PARALLELY by 3 different processes WHEN the workers are > 3.
 The uvicorn server will create a new process for each request when there is a blocking operation.
 
+
+But if the workers is = 1 => The function is being called concurently by each process.
+Start by 12278 and 0
+Start by 12278 and 1
+Start by 12278 and 2
+
+You are running with a single worker but multiple threads.
+When you send three requests to /3, they are handled by separate threads within the same process.
+Each thread independently blocks on time.sleep(5), but they run in parallel across threads
 """
 @app.get("/3")
 def index3(call_id: int):
